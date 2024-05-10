@@ -263,7 +263,8 @@ class Recommender:
 		tstLocs = []
 		for i in range(batch):
 			posloc = self.handler.tstInt[batIds[i]]
-			locset = list(np.arange(args.item))
+			log(posloc)
+			locset = range(args.item)
 			uLocs.extend([batIds[i]] * len(locset))
 			iLocs.extend(locset)
 			tstLocs.append(posloc)
