@@ -274,7 +274,7 @@ class Recommender:
 		epochHit, epochNdcg = [0] * 2
 		ids = self.handler.tstUsrs
 		num = len(ids)
-		tstBat = args.batch
+		tstBat = args.batch // 8
 		steps = int(np.ceil(num / tstBat))
 		for i in range(steps):
 			st = i * tstBat
