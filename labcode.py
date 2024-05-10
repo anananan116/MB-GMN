@@ -284,8 +284,9 @@ class Recommender:
 			uLocs, iLocs, tstLocs = self.sampleTestBatch(batIds, self.handler.trnMats[-1])
 			feed_dict[self.uids[-1]] = uLocs
 			feed_dict[self.iids[-1]] = iLocs
-			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict, options=config_pb2.RunOptions(report_tensor_allocations_upon_oom=True))
-			hit, ndcg = self.calcRes(np.reshape(preds, [ed - st, -1]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
+			print(len(uLocs), len(iLocs), len(tstLocs))
+			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict)
+			hit, ndcg = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
 			epochHit += hit
 			epochNdcg += ndcg
 			log('Steps %d/%d: hit = %d, ndcg = %d          ' % (i, steps, hit, ndcg), save=False, oneline=True)
