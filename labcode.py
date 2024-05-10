@@ -284,7 +284,7 @@ class Recommender:
 			feed_dict[self.uids[-1]] = uLocs
 			feed_dict[self.iids[-1]] = iLocs
 			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict)
-			hit, ndcg, hit_5, ndcg_5 = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
+			hit, ndcg, hit_5, ndcg_5 = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, iLocs)
 			epochHit += hit
 			epochNdcg += ndcg
 			epochHit_5 += hit_5
