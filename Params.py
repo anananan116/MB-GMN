@@ -25,7 +25,7 @@ def parse_args():
 	parser.add_argument('--slot', default=5, type=float, help='length of time slots')
 	parser.add_argument('--graphSampleN', default=15000, type=int, help='use 25000 for training and 200000 for testing, empirically')
 	parser.add_argument('--divSize', default=10000, type=int, help='div size for smallTestEpoch')
-	parser.add_argument('--tstEpoch', default=3, type=int, help='number of epoch to test while training')
+	parser.add_argument('--tstEpoch', default=10, type=int, help='number of epoch to test while training')
 	parser.add_argument('--subUsrSize', default=10, type=int, help='number of item for each sub-user')
 	parser.add_argument('--subUsrDcy', default=0.9, type=float, help='decay factor for sub-users over time')
 	return parser.parse_args()

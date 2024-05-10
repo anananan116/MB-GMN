@@ -264,15 +264,13 @@ class Recommender:
 		for i in range(batch):
 			posloc = self.handler.tstInt[batIds[i]]
 			locset = list(np.arange(args.item))
-			# negset = np.reshape(np.argwhere(temLabel[i] == 0), [-1])
-			# locset = np.concatenate((negset, np.array([posloc])))
 			uLocs.extend([batIds[i]] * len(locset))
 			iLocs.extend(locset)
 			tstLocs.append(posloc)
 		return uLocs, iLocs, tstLocs
 
 	def testEpoch(self):
-		epochHit, epochNdcg = [0] * 2
+		epochHit, epochNdcg, epochHit_5, epochNdcg_5 = [0] * 4
 		ids = self.handler.tstUsrs
 		num = len(ids)
 		tstBat = args.batch // 8
@@ -285,12 +283,13 @@ class Recommender:
 			uLocs, iLocs, tstLocs = self.sampleTestBatch(batIds, self.handler.trnMats[-1])
 			feed_dict[self.uids[-1]] = uLocs
 			feed_dict[self.iids[-1]] = iLocs
-			print(len(uLocs), len(iLocs), len(tstLocs))
 			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict)
-			hit, ndcg = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
+			hit, ndcg, hit_5, ndcg_5 = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
 			epochHit += hit
 			epochNdcg += ndcg
-			log('Steps %d/%d: hit = %d, ndcg = %d          ' % (i, steps, hit, ndcg), save=False, oneline=True)
+			epochHit_5 += hit_5
+			epochNdcg_5 += ndcg_5
+			log('Steps %d/%d: hit@10 = %d, ndcg@10 = %d, hit@5 = %d, ndcg@5 = %d          ' % (i, steps, hit, ndcg, hit_5, ndcg_5), save=False, oneline=True)
 		ret = dict()
 		ret['HR'] = epochHit / num
 		ret['NDCG'] = epochNdcg / num
@@ -299,6 +298,8 @@ class Recommender:
 	def calcRes(self, preds, tstLocs, tstData):
 		hit = 0
 		ndcg = 0
+		hit_5 = 0
+		ndcg_5 = 0
 		for j in range(preds.shape[0]):
 			predvals = list(zip(preds[j], tstData[j]))
 			predvals.sort(key=lambda x: x[0], reverse=True)
@@ -306,7 +307,12 @@ class Recommender:
 			if tstLocs[j] in shoot:
 				hit += 1
 				ndcg += np.reciprocal(np.log2(shoot.index(tstLocs[j]) + 2))
-		return hit, ndcg
+    
+			shoot = list(map(lambda x: x[1], predvals[:(args.shoot//2)]))
+			if tstLocs[j] in shoot:
+				hit_5 += 1
+				ndcg_5 += np.reciprocal(np.log2(shoot.index(tstLocs[j]) + 2))
+		return hit, ndcg, hit_5, ndcg_5
 	
 	def saveHistory(self):
 		if args.epoch == 0:
