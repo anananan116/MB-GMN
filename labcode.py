@@ -257,24 +257,18 @@ class Recommender:
 
 	def sampleTestBatch(self, batIds, labelMat):
 		batch = len(batIds)
-		temTst = self.handler.tstInt[batIds]
 		temLabel = labelMat[batIds].toarray()
-		temlen = batch * 100
-		uLocs = [None] * temlen
-		iLocs = [None] * temlen
-		tstLocs = [None] * batch
-		cur = 0
+		uLocs = []
+		iLocs = []
+		tstLocs = []
 		for i in range(batch):
-			posloc = temTst[i]
-			negset = np.reshape(np.argwhere(temLabel[i]==0), [-1])
-			rdnNegSet = np.random.permutation(negset)[:99]
-			locset = np.concatenate((rdnNegSet, np.array([posloc])))
-			tstLocs[i] = locset
-			for j in range(100):
-				uLocs[cur] = batIds[i]
-				iLocs[cur] = locset[j]
-				cur += 1
-		return uLocs, iLocs, temTst, tstLocs
+			posloc = self.handler.tstInt[batIds[i]]
+			negset = np.reshape(np.argwhere(temLabel[i] == 0), [-1])
+			locset = np.concatenate((negset, np.array([posloc])))
+			uLocs.extend([batIds[i]] * len(locset))
+			iLocs.extend(locset)
+			tstLocs.append(posloc)
+		return uLocs, iLocs, tstLocs
 
 	def testEpoch(self):
 		epochHit, epochNdcg = [0] * 2
@@ -284,14 +278,14 @@ class Recommender:
 		steps = int(np.ceil(num / tstBat))
 		for i in range(steps):
 			st = i * tstBat
-			ed = min((i+1) * tstBat, num)
+			ed = min((i + 1) * tstBat, num)
 			batIds = ids[st: ed]
 			feed_dict = {}
-			uLocs, iLocs, temTst, tstLocs = self.sampleTestBatch(batIds, self.handler.trnMats[-1])
+			uLocs, iLocs, tstLocs = self.sampleTestBatch(batIds, self.handler.trnMats[-1])
 			feed_dict[self.uids[-1]] = uLocs
 			feed_dict[self.iids[-1]] = iLocs
 			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict, options=config_pb2.RunOptions(report_tensor_allocations_upon_oom=True))
-			hit, ndcg = self.calcRes(np.reshape(preds, [ed-st, 100]), temTst, tstLocs)
+			hit, ndcg = self.calcRes(np.reshape(preds, [ed - st, -1]), tstLocs, self.handler.trnMats[-1][batIds].toarray())
 			epochHit += hit
 			epochNdcg += ndcg
 			log('Steps %d/%d: hit = %d, ndcg = %d          ' % (i, steps, hit, ndcg), save=False, oneline=True)
@@ -300,16 +294,16 @@ class Recommender:
 		ret['NDCG'] = epochNdcg / num
 		return ret
 
-	def calcRes(self, preds, temTst, tstLocs):
+	def calcRes(self, preds, tstLocs, tstData):
 		hit = 0
 		ndcg = 0
 		for j in range(preds.shape[0]):
-			predvals = list(zip(preds[j], tstLocs[j]))
+			predvals = list(zip(preds[j], tstData[j]))
 			predvals.sort(key=lambda x: x[0], reverse=True)
 			shoot = list(map(lambda x: x[1], predvals[:args.shoot]))
-			if temTst[j] in shoot:
+			if tstLocs[j] in shoot:
 				hit += 1
-				ndcg += np.reciprocal(np.log2(shoot.index(temTst[j])+2))
+				ndcg += np.reciprocal(np.log2(shoot.index(tstLocs[j]) + 2))
 		return hit, ndcg
 	
 	def saveHistory(self):
