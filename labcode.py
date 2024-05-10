@@ -1,8 +1,3 @@
-import tensorflow as tf
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)	
-
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import numpy as np
@@ -12,6 +7,7 @@ from Utils.TimeLogger import log
 import Utils.NNLayers as NNs
 from Utils.NNLayers import FC, Regularize, Activate, Dropout, Bias, getParam, defineParam, defineRandomNameParam
 from DataHandler import negSamp, transpose, DataHandler, transToLsts
+import tensorflow as tf
 from tensorflow.core.protobuf import config_pb2
 import pickle
 
@@ -327,11 +323,16 @@ class Recommender:
 			self.metrics = pickle.load(fs)
 		log('Model Loaded')	
 
-logger.saveDefault = True
-log('Start')
-handler = DataHandler()
-handler.LoadData()
-log('Load Data')
+if __name__ == '__main__':
+	logger.saveDefault = True
+	config = tf.ConfigProto()
+	config.gpu_options.allow_growth = True
 
-recom = Recommender(session, handler)
-recom.run()
+	log('Start')
+	handler = DataHandler()
+	handler.LoadData()
+	log('Load Data')
+
+	with tf.Session(config=config) as sess:
+		recom = Recommender(sess, handler)
+		recom.run()
