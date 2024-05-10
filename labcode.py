@@ -263,7 +263,6 @@ class Recommender:
 		tstLocs = []
 		for i in range(batch):
 			posloc = self.handler.tstInt[batIds[i]]
-			log(posloc)
 			locset = range(args.item)
 			uLocs.extend([batIds[i]] * len(locset))
 			iLocs.extend(locset)
@@ -305,7 +304,9 @@ class Recommender:
 			predvals = list(zip(preds[j], tstData[j]))
 			predvals.sort(key=lambda x: x[0], reverse=True)
 			shoot = list(map(lambda x: x[1], predvals[:args.shoot]))
+			log(shoot)
 			if tstLocs[j] in shoot:
+				log("!!!!!!")
 				hit += 1
 				ndcg += np.reciprocal(np.log2(shoot.index(tstLocs[j]) + 2))
     
