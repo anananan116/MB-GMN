@@ -273,7 +273,7 @@ class Recommender:
 		epochHit, epochNdcg, epochHit_5, epochNdcg_5 = [0] * 4
 		ids = self.handler.tstUsrs
 		num = len(ids)
-		tstBat = args.eval_batch
+		tstBat = args.batch_eval
 		steps = int(np.ceil(num / tstBat))
 		for i in range(steps):
 			st = i * tstBat
