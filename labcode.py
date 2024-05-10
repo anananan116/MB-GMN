@@ -273,7 +273,7 @@ class Recommender:
 		epochHit, epochNdcg, epochHit_5, epochNdcg_5 = [0] * 4
 		ids = self.handler.tstUsrs
 		num = len(ids)
-		tstBat = args.batch // 8
+		tstBat = args.eval_batch
 		steps = int(np.ceil(num / tstBat))
 		for i in range(steps):
 			st = i * tstBat
@@ -291,8 +291,10 @@ class Recommender:
 			epochNdcg_5 += ndcg_5
 			log('Steps %d/%d: hit@10 = %d, ndcg@10 = %d, hit@5 = %d, ndcg@5 = %d          ' % (i, steps, hit, ndcg, hit_5, ndcg_5), save=False, oneline=True)
 		ret = dict()
-		ret['HR'] = epochHit / num
-		ret['NDCG'] = epochNdcg / num
+		ret['HR@10'] = epochHit / num
+		ret['NDCG@10'] = epochNdcg / num
+		ret['HR@5'] = epochHit_5 / num
+		ret['NDCG@5'] = epochNdcg_5 / num
 		return ret
 
 	def calcRes(self, preds, tstLocs):
