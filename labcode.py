@@ -284,7 +284,7 @@ class Recommender:
 			feed_dict[self.uids[-1]] = uLocs
 			feed_dict[self.iids[-1]] = iLocs
 			preds = self.sess.run(self.targetPreds, feed_dict=feed_dict)
-			hit, ndcg, hit_5, ndcg_5 = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs, iLocs)
+			hit, ndcg, hit_5, ndcg_5 = self.calcRes(np.reshape(preds, [ed - st, args.item]), tstLocs)
 			epochHit += hit
 			epochNdcg += ndcg
 			epochHit_5 += hit_5
@@ -295,7 +295,7 @@ class Recommender:
 		ret['NDCG'] = epochNdcg / num
 		return ret
 
-	def calcRes(self, preds, tstLocs, tstData):
+	def calcRes(self, preds, tstLocs):
 		hit = 0
 		ndcg = 0
 		hit_5 = 0
@@ -305,9 +305,7 @@ class Recommender:
 			predvals = list(zip(preds[j], test_items))
 			predvals.sort(key=lambda x: x[0], reverse=True)
 			shoot = list(map(lambda x: x[1], predvals[:args.shoot]))
-			log(shoot)
 			if tstLocs[j] in shoot:
-				log("!!!!!!")
 				hit += 1
 				ndcg += np.reciprocal(np.log2(shoot.index(tstLocs[j]) + 2))
     
