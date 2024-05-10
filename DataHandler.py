@@ -56,7 +56,7 @@ class DataHandler:
 			behs = ['click', 'fav', 'cart', 'buy']
 		elif args.data == 'yelp':
 			predir = './Datasets/yelp/'
-			behs = ['tip', 'pos', 'neutral', 'neg']
+			behs = ['tip', 'neg', 'neutral', 'pos']
 		self.predir = predir
 		self.behs = behs
 		self.trnfile = predir + 'trn_'
