@@ -300,8 +300,9 @@ class Recommender:
 		ndcg = 0
 		hit_5 = 0
 		ndcg_5 = 0
+		test_items = range(args.item)
 		for j in range(preds.shape[0]):
-			predvals = list(zip(preds[j], tstData[j]))
+			predvals = list(zip(preds[j], test_items))
 			predvals.sort(key=lambda x: x[0], reverse=True)
 			shoot = list(map(lambda x: x[1], predvals[:args.shoot]))
 			log(shoot)
